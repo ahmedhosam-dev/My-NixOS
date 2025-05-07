@@ -1,14 +1,13 @@
 { config, lib, pkgs, ... }:
 
-{
+let
+  username = "ahmed";
+in {
   imports =
     [ 
       ./hardware-configuration.nix
       ./gpu-configuration.nix
       ./fonts.nix
-      ./users.nix
-      # ./home-manager.nix
-      # ./audio.nix
     ];
 
   ######################
@@ -23,6 +22,31 @@
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
   
+  ###############
+  # FILE SYSTEM #
+  ###############
+  # Enable NTFS support
+  boot.supportedFilesystems = [ "ntfs" ];
+
+  # File systems configuration
+  fileSystems = {
+    "/mnt/W" = {
+      device = "/dev/nvme0n1p3";
+      fsType = "ntfs-3g";
+      options = [ "rw" "uid=1000" ];
+    };
+    "/mnt/S" = {
+      device = "/dev/nvme0n1p4";
+      fsType = "ntfs-3g";
+      options = [ "rw" "uid=1000" ];
+    };
+    "/mnt/C" = {
+      device = "/dev/nvme0n1p5";
+      fsType = "ntfs-3g";
+      options = [ "rw" "uid=1000" ];
+    };
+  };
+
   ################
   # LOCALIZATION #
   ################
@@ -31,9 +55,12 @@
   ##########################
   # WINDOW MANAGER/DESKTOP #
   ##########################
-  programs.sway.enable = true;
   programs.hyprland.enable = true;
-  
+
+  ##############
+  # ENABLE ZSH #
+  ##############
+  programs.zsh.enable = true;
 
   #################
   # LOGIN MANAGER #
@@ -46,29 +73,71 @@
     };
   };
 
+
+  ###########
+  # SESSION #
+  ###########
+  environment.sessionVariables = {
+    GTK_THEME = "Adwaita";  # or your preferred theme
+  };
+
+  #########
+  # Users #
+  #########
+  users.users."${username}" = {
+    isNormalUser = true;
+    home = "/home/${username}";
+    extraGroups = [ "wheel" "networkmanager" "input" "seat" "video" "audio" "docker" ];
+    shell = pkgs.zsh;
+  };
+
+  ##############
+  # VIRTUALBOX #
+  ##############
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "${username}" "root" ];
+
   #########
   # INPUT #
   #########
   services.libinput = {
     enable = true;
+    
     touchpad = {
-      naturalScrolling = false;
+      # Basic behavior
+      naturalScrolling = true;
       tapping = true;
-      clickMethod = "clickfinger";
-      scrollMethod = "two-finger";
-      middleEmulation = true;
+      tappingDragLock = true;
       disableWhileTyping = true;
-      accelSpeed = "0.5";
-    };
-  };
+      middleEmulation = true;
+      scrollMethod = "twofinger";
+      accelSpeed = "0.5";  # Adjust tracking speed (0 to 1)
+      
+      # Advanced options
+      additionalOptions = ''
+        # # Enable all gesture types
+        # Option "GestureEnable" "true"
+        # Option "CircularScrolling" "false"
+        # Option "ScrollPixelDistance" "15"
 
-  systemd.user.services.touchegg = {
-    enable = true;
-    description = "Touchégg";
-    wantedBy = [ "graphical-session.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.touchegg}/bin/touchegg";
-      Restart = "on-failure";
+        Option "Gesture" "true"
+        Option "PinchGesture" "true"
+        
+        # Pinch gesture sensitivity
+        Option "PinchSensitivity" "50"
+        Option "PinchTransition" "50"
+         
+        # # Tap configuration
+        # Option "Tapping" "on"
+        # Option "TappingButtonMap" "lrm"
+        # Option "TapAndDrag" "true"
+        # Option "TapDragLock" "true"
+        # 
+        # # Palm rejection
+        # Option "PalmDetection" "true"
+        # Option "PalmMinWidth" "8"
+        # Option "PalmMinZ" "100"
+      '';
     };
   };
 
@@ -78,7 +147,7 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.ahmed = import ./home/ahmed/main.nix;
+    users.${username} = import ./home/${username}/main.nix;
   };
 
   ############
@@ -87,7 +156,7 @@
   security = {
     doas = {
       enable = true;
-      extraConfig = ''permit nopass ahmed as root'';
+      extraConfig = ''permit nopass ${username} as root'';
     };
 
     rtkit.enable = true;
@@ -127,22 +196,33 @@
     # Core utilities
     git wget curl btop unzip gnumake
 
+    # R/W ntfs filesystem
+    fuse ntfs3g
+
     # Desktop environment components 
     waybar rofi rofimoji dolphin kitty hyprpaper pavucontrol
     wlogout jq gnused gnugrep coreutils libnotify
     pulseaudio libcanberra wireplumber rnnoise-plugin
-    nvtopPackages.intel nvtopPackages.nvidia
-    touchegg bottles cliphist
+    nvtopPackages.intel nvtopPackages.nvidia swaybg
+    bottles cliphist swayosd libinput
 
     # System tools 
     docker docker-compose ollama
+
   ];
 
   #########################
   # ENVIRONMENT VARIABLES #
   #########################
-  environment.variables = {
-    EDITOR = "nvim";
+  environment = {
+    variables = {
+      EDITOR = "nvim";
+    };
+
+    sessionVariables = {
+      LIBINPUT_DEFAULT_OPTIONS = "gesture:pinch:true";
+      NIXOS_OZONE_WL = "1";
+    };
   };
 
   ############
