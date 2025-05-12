@@ -1,15 +1,18 @@
 { config, pkgs, lib, ... }:
 
-{
+let
+  wallPath = "~/Pictures/wallpapers/wallhaven-e8z3w8_1920x1080.png";
+in {
   xdg.configFile."hypr/hyprpaper.conf".text = ''
-    preload = ~/Pictures/wallpapers/wallhaven-we3r96_1920x1080.png
-    wallpaper = eDP-1, ~/Pictures/wallpapers/wallhaven-we3r96_1920x1080.png
+    preload = ${wallPath}
+    wallpaper = eDP-1, ${wallPath}
   '';
 
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
     xwayland.enable = true;
+
     
     settings = {
       # Monitor configuration
@@ -20,6 +23,10 @@
         "XCURSOR_SIZE,24"
         "HYPRCURSOR_SIZE,24"
         "GDK_BACKEND,wayland"
+        "QT_QPA_PLATFORM=wayland"
+        "QT_QPA_PLATFORMTHEME=qt5ct"
+        "QT_STYLE_OVERRIDE=kvantum-dark"  # If you use Kvantum
+        "GTK2_RC_FILES=${pkgs.writeText "gtk2rc" ''gtk-theme-name="WhiteSur-Dark"''}"
       ];
 
       # Autostart
@@ -136,7 +143,7 @@
       "$mainMod" = "Super_L";
       "$mainShift" = "Super_L_SHIFT";
       "$terminal" = "kitty";
-      "$fileManager" = "dolphin";
+      "$fileManager" = "thunar";
       "$menu" = "rofi -show drun";
       "$filebrowser" = "rofi -show filebrowser";
       "$emoji" = "rofimoji --action clipboard --clipboarder wl-copy";
@@ -160,6 +167,7 @@
         "$mainShift,      E,          exec, $filebrowser"
         "          ,      Print,      exec, grim -g \"$(slurp)\" - | swappy -f -"
         "$mainMod,        V,          exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+        "$mainMod,        X,          exec, wlogout"
         
         # Movement
         "$mainMod, h, movefocus, l"

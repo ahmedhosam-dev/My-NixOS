@@ -8,6 +8,7 @@ in {
       ./hardware-configuration.nix
       ./gpu-configuration.nix
       ./fonts.nix
+      ./audio.nix
     ];
 
   ######################
@@ -71,14 +72,6 @@ in {
         command = "${pkgs.greetd.tuigreet}/bin/tuigreet --asterisks --time";
         user = "greeter";
     };
-  };
-
-
-  ###########
-  # SESSION #
-  ###########
-  environment.sessionVariables = {
-    GTK_THEME = "Adwaita";  # or your preferred theme
   };
 
   #########
@@ -175,11 +168,6 @@ in {
   };
   nixpkgs.config.allowUnfree = true;
 
-  ###########
-  # FLATPAK #
-  ###########
-  services.flatpak.enable = true;
-
   ############
   # HARDWARE #
   ############
@@ -187,7 +175,50 @@ in {
     enable = true;
     powerOnBoot = true;
   };
-  services.blueman.enable = true;
+
+  ############
+  # SERVICES #
+  ############
+  services = {
+    tlp = {
+      enable = true;
+      settings = {
+        # CPU settings (Intel-specific)
+        CPU_SCALING_GOVERNOR_ON_AC = "performance";
+        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+        CPU_MAX_PERF_ON_AC = 90;
+        CPU_MAX_PERF_ON_BAT = 70;
+        
+        # NVIDIA GPU power-saving
+        NVIDIA_DYNAMIC_POWER_MANAGEMENT = "1"; # (0=off, 1=aggressive power-saving)
+        
+        # Disable Turbo Boost (reduces heat)
+        CPU_BOOST_ON_AC = "0";
+        CPU_BOOST_ON_BAT = "0";
+        
+        # PCIe power-saving (for Wi-Fi, USB, etc.)
+        PCIE_ASPM_ON_BAT = "powersupersave";
+      };
+    };
+    pipewire = {
+      enable = true;
+      audio.enable = true;
+      pulse.enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+    };
+    dbus.enable = true;
+    blueman.enable = true;
+    power-profiles-daemon.enable = false;
+  };
+
+  virtualisation.docker.enable = true;
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  };
 
   ###################
   # SYSTEM PACKAGES #
@@ -200,16 +231,32 @@ in {
     fuse ntfs3g
 
     # Desktop environment components 
-    waybar rofi rofimoji dolphin kitty hyprpaper pavucontrol
+    waybar rofi rofimoji kitty hyprpaper pavucontrol
     wlogout jq gnused gnugrep coreutils libnotify
     pulseaudio libcanberra wireplumber rnnoise-plugin
     nvtopPackages.intel nvtopPackages.nvidia swaybg
-    bottles cliphist swayosd libinput
+    cliphist swayosd libinput 
 
     # System tools 
     docker docker-compose ollama
 
   ];
+
+  #########
+  # STEAM #
+  #########
+  programs.steam = {
+      enable = true;
+      remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+      dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+      localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+  };
+  # services.getty.autologinUser = "ahmed";
+  # environment = {
+  #   loginShellInit = ''
+  #     [[ "$(tty)" = "/dev/tty1" ]] && ./gs.sh
+  #   '';
+  # };
 
   #########################
   # ENVIRONMENT VARIABLES #
@@ -217,21 +264,19 @@ in {
   environment = {
     variables = {
       EDITOR = "nvim";
+      BROWSER = "brave";
+      TERM = "kitty";
     };
 
     sessionVariables = {
       LIBINPUT_DEFAULT_OPTIONS = "gesture:pinch:true";
+      ADW_COLOR_SCHEME = "prefer-dark";
       NIXOS_OZONE_WL = "1";
+      GTK_THEME = "WhiteSur-Dark";
+      XCURSOR_THEME = "Bibata-Modern-Ice";
+      XDG_CURRENT_DESKTOP = "Hyprland";
     };
   };
-
-  ############
-  # SERVICES #
-  ############
-  services.dbus.enable = true;
-  xdg.portal.enable = true;
-
-  virtualisation.docker.enable = true;
 
   ###########
   # SYSTEMD #
