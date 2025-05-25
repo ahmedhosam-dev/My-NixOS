@@ -32,20 +32,20 @@
     open = false;
 
     # Enable the Nvidia settings menu,
-	# accessible via `nvidia-settings`.
+	  # accessible via `nvidia-settings`.
     nvidiaSettings = true;
+
+    prime = {
+        # Enabling PRIME sync introduces better performance and greatly reduces screen tearing,
+        # at the expense of higher power consumption since the Nvidia GPU will not go to sleep completely unless called for
+        sync.enable = true;
+    
+        # Make sure to use the correct Bus ID values for your system!
+        intelBusId = "PCI:0:2:0";
+        nvidiaBusId = "PCI:46:0:0";
+      };
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
-
-  hardware.nvidia.prime = {
-    # Enabling PRIME sync introduces better performance and greatly reduces screen tearing,
-    # at the expense of higher power consumption since the Nvidia GPU will not go to sleep completely unless called for
-    sync.enable = true;
-
-    # Make sure to use the correct Bus ID values for your system!
-    intelBusId = "PCI:0:2:0";
-    nvidiaBusId = "PCI:46:0:0";
   };
 }

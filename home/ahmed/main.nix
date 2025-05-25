@@ -25,9 +25,11 @@
     
     # Applications
     brave
-    (discord.override { withVencord = true; })
+    (discord.override { 
+      # withVencord = true;
+    })
     obsidian
-    vscode-fhs
+    # vscode-fhs
     postman
     figma-linux
     spotify
@@ -37,6 +39,9 @@
     vlc
     bottles 
     evince
+    sticky-notes
+    telegram-desktop
+    pomodoro-gtk
     
     # Utilities
     tree
@@ -52,6 +57,9 @@
     vlc-bittorrent
     gtk3 gtk4 
     gvfs
+    tmux
+    fd
+    ripgrep
 
     # theme
     whitesur-gtk-theme

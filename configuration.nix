@@ -22,6 +22,14 @@ in {
   ##############
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
+
+  ############
+  # KEYBOARD #
+  ############
+  services.xserver = {
+    xkb.layout = "us,ara";
+    xkb.options = "grp:win_space_toggle, caps:swapescape";
+  };
   
   ###############
   # FILE SYSTEM #
@@ -180,28 +188,6 @@ in {
   # SERVICES #
   ############
   services = {
-    tlp = {
-      enable = true;
-      settings = {
-        # CPU settings (Intel-specific)
-        CPU_SCALING_GOVERNOR_ON_AC = "performance";
-        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-        CPU_MAX_PERF_ON_AC = 90;
-        CPU_MAX_PERF_ON_BAT = 70;
-        
-        # NVIDIA GPU power-saving
-        NVIDIA_DYNAMIC_POWER_MANAGEMENT = "1"; # (0=off, 1=aggressive power-saving)
-        
-        # Disable Turbo Boost (reduces heat)
-        CPU_BOOST_ON_AC = "0";
-        CPU_BOOST_ON_BAT = "0";
-        
-        # PCIe power-saving (for Wi-Fi, USB, etc.)
-        PCIE_ASPM_ON_BAT = "powersupersave";
-      };
-    };
     pipewire = {
       enable = true;
       audio.enable = true;
@@ -212,12 +198,19 @@ in {
     dbus.enable = true;
     blueman.enable = true;
     power-profiles-daemon.enable = false;
+    gnome.gnome-keyring.enable = true;
   };
 
+
   virtualisation.docker.enable = true;
+
   xdg.portal = {
     enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    wlr.enable = true;
+    extraPortals = with pkgs; [ 
+      xdg-desktop-portal-gtk 
+      xdg-desktop-portal-gnome
+    ];
   };
 
   ###################
@@ -225,7 +218,7 @@ in {
   ###################
   environment.systemPackages = with pkgs; [
     # Core utilities
-    git wget curl btop unzip gnumake
+    git wget curl btop unzip gnumake libgcc
 
     # R/W ntfs filesystem
     fuse ntfs3g
@@ -236,10 +229,21 @@ in {
     pulseaudio libcanberra wireplumber rnnoise-plugin
     nvtopPackages.intel nvtopPackages.nvidia swaybg
     cliphist swayosd libinput 
+    xdg-desktop-portal
+    xdg-desktop-portal-wlr
+    xdg-desktop-portal-gtk
 
     # System tools 
     docker docker-compose ollama
 
+    # LSP Servers
+    lua-language-server nixd lsp-ai marksman yaml-language-server
+    vue-language-server typescript-language-server tailwindcss-language-server
+    svelte-language-server vim-language-server cmake-language-server
+    java-language-server dockerfile-language-server-nodejs 
+
+    # bash-language-serve
+    autotools-language-server
   ];
 
   #########
@@ -251,12 +255,6 @@ in {
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
       localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
-  # services.getty.autologinUser = "ahmed";
-  # environment = {
-  #   loginShellInit = ''
-  #     [[ "$(tty)" = "/dev/tty1" ]] && ./gs.sh
-  #   '';
-  # };
 
   #########################
   # ENVIRONMENT VARIABLES #
@@ -266,6 +264,7 @@ in {
       EDITOR = "nvim";
       BROWSER = "brave";
       TERM = "kitty";
+      XDG_CACHE_HOME = "$HOME/.cache";
     };
 
     sessionVariables = {
@@ -275,6 +274,10 @@ in {
       GTK_THEME = "WhiteSur-Dark";
       XCURSOR_THEME = "Bibata-Modern-Ice";
       XDG_CURRENT_DESKTOP = "Hyprland";
+      XDG_SESSION_TYPE = "wayland";
+      XDG_SESSION_DESKTOP = "Hyprland";
+      QT_QPA_PLATFORMTHEME = "gtk3";
+      DISCORD_USE_X11="1 discord";
     };
   };
 
@@ -297,6 +300,42 @@ in {
     enable = true;
     memoryPercent = 25;
     algorithm = "zstd";
+  };
+
+  ####################
+  # POWER MANAGEMENT #
+  ####################
+  powerManagement.enable = true;
+  services = {
+    thermald.enable = true;
+    tlp = {
+      enable = true;
+      settings = {
+        # CPU settings (Intel-specific)
+        CPU_SCALING_GOVERNOR_ON_AC = "performance";
+        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+        CPU_MIN_PERF_ON_AC = 0;
+        CPU_MAX_PERF_ON_AC = 100;
+        CPU_MIN_PERF_ON_BAT = 0;
+        CPU_MAX_PERF_ON_BAT = 20;
+        
+        # NVIDIA GPU power-saving
+        NVIDIA_DYNAMIC_POWER_MANAGEMENT = "1"; # (0=off, 1=aggressive power-saving)
+        
+        # Disable Turbo Boost (reduces heat)
+        CPU_BOOST_ON_AC = "0";
+        CPU_BOOST_ON_BAT = "0";
+        
+        # PCIe power-saving (for Wi-Fi, USB, etc.)
+        PCIE_ASPM_ON_BAT = "powersupersave";
+
+        # Optional helps save long term battery health
+        # START_CHARGE_THRESH_BAT0 = 40; # 40 and below it starts to charge
+        # STOP_CHARGE_THRESH_BAT0 = 80; # 80 and above it stops charging
+      };
+    };
   };
 
   ################################

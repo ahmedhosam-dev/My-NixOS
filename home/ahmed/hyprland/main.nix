@@ -1,7 +1,8 @@
 { config, pkgs, lib, ... }:
 
 let
-  wallPath = "~/Pictures/wallpapers/wallhaven-e8z3w8_1920x1080.png";
+  # wallPath = "~/Pictures/wallpapers/wallhaven-e8z3w8_1920x1080.png";
+  wallPath = "~/Pictures/wallpapers/wallhaven-x6x3gz_1920x1080.png";
 in {
   xdg.configFile."hypr/hyprpaper.conf".text = ''
     preload = ${wallPath}
@@ -31,9 +32,10 @@ in {
 
       # Autostart
       exec-once = [
-        "waybar"
         "hyprpaper"
-        "brave"
+        "waybar"
+        "[workspace 9] brave"
+        "[workspace 8] com.vixalien.sticky"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
       ];
@@ -246,6 +248,8 @@ in {
       # Window rules
       windowrule = [
         "float, pavucontrol"
+        "float, ^(com.vixalien.sticky)$"
+        "float, ^(pomodoro)$"
       ];
 
       windowrulev2 = [
@@ -254,16 +258,6 @@ in {
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
       ];
     };
-
-    # Extra configuration for better gesture recognition
-    # extraConfig = ''
-    #   # Touchpad device tuning (may need adjustment for your hardware)
-    #   device:touchpad {
-    #     sensitivity = 0.5
-    #     scroll_points = 100,200,300
-    #     tap-and-drag = true
-    #   }
-    # '';
   };
 
   # Additional Hyprland-related packages
