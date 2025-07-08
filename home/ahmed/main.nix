@@ -86,10 +86,10 @@
       source ~/.p10k.zsh
       bindkey -v
 
-      if [[ -z "$FASTFETCH_SHOWN" ]]; then
-        export FASTFETCH_SHOWN=1
-        fastfetch
-      fi
+      # if [[ -z "$FASTFETCH_SHOWN" ]]; then
+      #   export FASTFETCH_SHOWN=1
+      #   fastfetch
+      # fi
     '';
   };
 
