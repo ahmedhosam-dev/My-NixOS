@@ -17,18 +17,47 @@ in {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  ################
+  # AUTO UPGRADE #
+  ################
+  system.autoUpgrade.enable  = true;
+  system.autoUpgrade.allowReboot  = true;
+
   ##############
   # NETWORKING #
   ##############
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
+  ##########
+  # GREETD #
+  ##########
+  services.greetd = {
+    enable = true;
+    settings = {
+      default_session = {
+        command = ''
+          ${pkgs.greetd.tuigreet}/bin/tuigreet \
+          --asterisks \
+          --time \
+          --remember \
+          --cmd "Hyprland"
+        '';
+        user = "greeter";
+      };
+    };
+  };
+
   ############
   # KEYBOARD #
   ############
   services.xserver = {
-    xkb.layout = "us,ara";
-    xkb.options = "grp:win_space_toggle, caps:swapescape";
+    enable = true;
+    xkb = {
+      layout = "us";
+      variant = "";
+      options = "grp:win_space_toggle, caps:swapescape";
+    };
   };
   
   ###############
@@ -71,17 +100,6 @@ in {
   ##############
   programs.zsh.enable = true;
 
-  #################
-  # LOGIN MANAGER #
-  #################
-  services.greetd = {
-    enable = true;
-    settings.default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --asterisks --time";
-        user = "greeter";
-    };
-  };
-
   #########
   # Users #
   #########
@@ -91,6 +109,7 @@ in {
     extraGroups = [ "wheel" "networkmanager" "input" "seat" "video" "audio" "docker" ];
     shell = pkgs.zsh;
   };
+  home-manager.backupFileExtension = "backup-" + pkgs.lib.readFile "${pkgs.runCommand "timestamp" {} "echo -n `date '+%Y%m%d%H%M%S'` > $out"}";
 
   ##############
   # VIRTUALBOX #
@@ -199,8 +218,8 @@ in {
     blueman.enable = true;
     power-profiles-daemon.enable = false;
     gnome.gnome-keyring.enable = true;
+    wordpress.sites."localhost" = {};
   };
-
 
   virtualisation.docker.enable = true;
 
@@ -216,15 +235,22 @@ in {
   ###################
   # SYSTEM PACKAGES #
   ###################
+  # nixpkgs.overlays = [ (import ./overrides.nix) ];
   environment.systemPackages = with pkgs; [
     # Core utilities
     git wget curl btop unzip gnumake libgcc
+    gcc cmake tree fzf fd ripgrep lm_sensors
+
+    # Development tools
+    php84 php84Packages.composer
+    nodejs_22
+    python313 python312Packages.pip
 
     # R/W ntfs filesystem
-    fuse ntfs3g
+    fuse ntfs3g gvfs
 
     # Desktop environment components 
-    waybar rofi rofimoji kitty hyprpaper pavucontrol
+    waybar rofi rofimoji kitty hyprpaper hyprlock pavucontrol
     wlogout jq gnused gnugrep coreutils libnotify
     pulseaudio libcanberra wireplumber rnnoise-plugin
     nvtopPackages.intel nvtopPackages.nvidia swaybg
@@ -232,19 +258,27 @@ in {
     xdg-desktop-portal
     xdg-desktop-portal-wlr
     xdg-desktop-portal-gtk
+    # libappindicator-gtk3
+    wayland-utils
+    wl-clipboard
+    
 
     # System tools 
     docker docker-compose ollama
+
+    # KDE
+    # kdePackages.kcalc
+    # kdePackages.breeze
+    # kdePackages.breeze-icons
+    # kdePackages.qqc2-breeze-style
 
     # LSP Servers
     lua-language-server nixd lsp-ai marksman yaml-language-server
     vue-language-server typescript-language-server tailwindcss-language-server
     svelte-language-server vim-language-server cmake-language-server
     java-language-server dockerfile-language-server-nodejs 
-
-    # bash-language-serve
     autotools-language-server
-  ];
+  ]; 
 
   #########
   # STEAM #

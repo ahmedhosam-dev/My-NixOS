@@ -17,7 +17,15 @@ in {
     
     settings = {
       # Monitor configuration
-      monitor = ", 1920x1080@60, 0x0, 1";
+      monitor = [
+        "eDP-1, 1920x1080@60, 0x0, 1"
+        "HDMI-A-1, preferred, auto-left, 1, transform, 1"
+      ];
+
+      workspace = [
+        "1, monitor:eDP-1"
+        "5, monitor:HDMI-A-1"
+      ];
 
       # Environment variables
       env = [
@@ -35,7 +43,7 @@ in {
         "hyprpaper"
         "waybar"
         "[workspace 9] brave"
-        "[workspace 8] com.vixalien.sticky"
+        # "[workspace 8] com.vixalien.sticky"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
       ];
@@ -144,6 +152,7 @@ in {
       # Keybindings
       "$mainMod" = "Super_L";
       "$mainShift" = "Super_L_SHIFT";
+      "$mainCTRL" = "Control_R";
       "$terminal" = "kitty";
       "$fileManager" = "thunar";
       "$menu" = "rofi -show drun";
@@ -170,6 +179,7 @@ in {
         "          ,      Print,      exec, grim -g \"$(slurp)\" - | swappy -f -"
         "$mainMod,        V,          exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
         "$mainMod,        X,          exec, wlogout"
+        "$mainCTRL,       apostrophe,          exec, pamixer --default-source --toggle-mute && notify-send \"Mic:\" \"Toggle Mute\""
         
         # Movement
         "$mainMod, h, movefocus, l"
@@ -247,9 +257,9 @@ in {
 
       # Window rules
       windowrule = [
-        "float, pavucontrol"
-        "float, ^(com.vixalien.sticky)$"
-        "float, ^(pomodoro)$"
+        # "float, pavucontrol"
+        # "float, ^(com.vixalien.sticky)$"
+        # "float, ^(pomodoro)$"
       ];
 
       windowrulev2 = [

@@ -13,7 +13,7 @@ require('config.cmp')
 require('config.vsnip')
 require('config.gitsigns')
 require('config.indentation')
-require('config.whichkey')
+-- require('config.whichkey')
 
 -- disable netrw at the very start of your init.lua
 vim.g.loaded_netrw = 1

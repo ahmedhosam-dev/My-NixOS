@@ -27,7 +27,8 @@
       fantasque-sans-mono
       iosevka
       cascadia-code
-      nerdfonts
+      # nerdfonts
+      nerd-fonts.jetbrains-mono
       font-awesome
 
       # Additional useful fonts

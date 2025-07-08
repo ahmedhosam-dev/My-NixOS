@@ -13,53 +13,38 @@
     ./hyprland/main.nix
     ./neovim/main.nix
     ./kitty.nix
+    ./waybar/main.nix
   ];
+
 
   # User packages
   home.packages = with pkgs; [
-    # Development tools
-    gcc cmake
-    php84 php84Packages.composer
-    nodejs_22
-    python313 python312Packages.pip
-    
     # Applications
     brave
-    (discord.override { 
-      # withVencord = true;
-    })
+    discord
     obsidian
-    # vscode-fhs
     postman
     figma-linux
     spotify
     wpsoffice
     xfce.thunar
     obs-studio
-    vlc
+    vlc vlc-bittorrent
     bottles 
     evince
     sticky-notes
     telegram-desktop
     pomodoro-gtk
+    # protonmail-desktop
     
     # Utilities
-    tree
-    fzf
     grim slurp swappy
-    libnotify
     gnome-system-monitor
-    ripgrep
-    breeze-icons
     kittysay
     fastfetch
     chafa
-    vlc-bittorrent
     gtk3 gtk4 
-    gvfs
     tmux
-    fd
-    ripgrep
 
     # theme
     whitesur-gtk-theme
@@ -97,7 +82,7 @@
       }
     ];
 
-    initExtra = ''
+    initContent = ''
       source ~/.p10k.zsh
       bindkey -v
 

@@ -50,3 +50,15 @@ map('n', 'j', 'jzz')
 map('n', 'k', 'kzz')
 map('n', '<C-d>', '<C-d>zz')
 map('n', '<C-u>', '<C-u>zz')
+
+-- Resizing splits
+map('n', '<A-Up>', ':resize -2<CR>')
+map('n', '<A-Down>', ':resize +2<CR>')
+map('n', '<A-Left>', ':vertical resize +2<CR>')
+map('n', '<A-Right>', ':vertical resize -2<CR>')
+
+-- Move splits 
+map('n', '<A-S-Left>', '<C-w>H')
+map('n', '<A-S-Down>', '<C-w>J')
+map('n', '<A-S-Up>', '<C-w>K')
+map('n', '<A-S-Right>', '<C-w>L')
